@@ -30,10 +30,46 @@ jobs:
       SUDO: "sudo -E"
     secrets: inherit
 
-  podman-tests:
+  podman-lint:
     needs: build-earthly-docker
     uses: ./.github/workflows/reusable-test.yml
     with:
+      TEST_TARGET: "+lint-all"
+      BUILT_EARTHLY_PATH: "./build/linux/amd64/earthly"
+      RUNS_ON: "ubuntu-latest"
+      BINARY: "podman"
+      SUDO: "sudo -E"
+    secrets: inherit
+
+  podman-tests-no-qemu:
+    needs: build-earthly-docker
+    uses: ./.github/workflows/reusable-test.yml
+    with:
+      TEST_TARGET: "+test-no-qemu"
+      BUILT_EARTHLY_PATH: "./build/linux/amd64/earthly"
+      RUNS_ON: "ubuntu-latest"
+      BINARY: "podman"
+      SUDO: "sudo -E"
+    secrets: inherit
+
+  podman-tests-require-account-access:
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    needs: build-earthly-docker
+    uses: ./.github/workflows/reusable-test.yml
+    with:
+      TEST_TARGET: "./tests+tests-that-require-earthly-technologies-account-access"
+      BUILT_EARTHLY_PATH: "./build/linux/amd64/earthly"
+      RUNS_ON: "ubuntu-latest"
+      BINARY: "podman"
+      SUDO: "sudo -E"
+    secrets: inherit
+
+  podman-tests-qemu:
+    needs: build-earthly-docker
+    uses: ./.github/workflows/reusable-test.yml
+    with:
+      TEST_TARGET: "+test-qemu"
+      USE_QEMU: true
       BUILT_EARTHLY_PATH: "./build/linux/amd64/earthly"
       RUNS_ON: "ubuntu-latest"
       BINARY: "podman"
@@ -44,7 +80,6 @@ jobs:
     # TODO: Figure out how to run multiple Podman instances in parallel with different ports for buildkitd
     needs:
     - build-earthly-docker
-    - podman-tests
     uses: ./.github/workflows/reusable-example.yml
     with:
       BUILT_EARTHLY_PATH: "./build/linux/amd64/earthly"
@@ -58,7 +93,6 @@ jobs:
     # TODO: Figure out how to run multiple Podman instances in parallel with different ports for buildkitd
     needs:
     - build-earthly-docker
-    - podman-examples-1
     uses: ./.github/workflows/reusable-example.yml
     with:
       BUILT_EARTHLY_PATH: "./build/linux/amd64/earthly"
@@ -72,7 +106,6 @@ jobs:
 #    # TODO: Figure out how to run multiple Podman instances in parallel with different ports for buildkitd
 #    needs:
 #    - build-earthly-docker
-#    - podman-examples-2
 #    uses: ./.github/workflows/reusable-test-local.yml
 #    with:
 #      BUILT_EARTHLY_PATH: "./build/linux/amd64/earthly"
@@ -98,7 +131,6 @@ jobs:
 #    # TODO: Figure out how to run multiple Podman instances in parallel with different ports for buildkitd
 #    needs:
 #    - build-earthly-docker
-#    - podman-push-integrations
 #    uses: ./.github/workflows/reusable-secrets-integrations.yml
 #    with:
 #      BUILT_EARTHLY_PATH: "./build/linux/amd64/earthly"
@@ -111,7 +143,6 @@ jobs:
 #    # TODO: Figure out how to run multiple Podman instances in parallel with different ports for buildkitd
 #    needs:
 #    - build-earthly-docker
-#    - podman-secret-integrations
 #    uses: ./.github/workflows/reusable-bootstrap-integrations.yml
 #    with:
 #      BUILT_EARTHLY_PATH: "./build/linux/amd64/earthly"
@@ -124,7 +155,6 @@ jobs:
 #    # TODO: Figure out how to run multiple Podman instances in parallel with different ports for buildkitd
 #    needs:
 #    - build-earthly-docker
-#    - podman-bootstrap-integrations
 #    uses: ./.github/workflows/reusable-repo-auth-tests.yml
 #    with:
 #      BUILT_EARTHLY_PATH: "./build/linux/amd64/earthly"
@@ -137,7 +167,6 @@ jobs:
 #    # TODO: Figure out how to run multiple Podman instances in parallel with different ports for buildkitd
 #    needs:
 #    - build-earthly-docker
-#    - podman-repo-auth-tests
 #    uses: ./.github/workflows/reusable-export-test.yml
 #    with:
 #      BUILT_EARTHLY_PATH: "./build/linux/amd64/earthly"
@@ -150,7 +179,6 @@ jobs:
 #    # TODO: Figure out how to run multiple Podman instances in parallel with different ports for buildkitd
 #    needs:
 #    - build-earthly-docker
-#    - podman-export-tests
 #    uses: ./.github/workflows/reusable-misc-tests.yml
 #    with:
 #      BUILT_EARTHLY_PATH: "./build/linux/amd64/earthly"
